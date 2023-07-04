@@ -1,17 +1,17 @@
 # Introduction #
-Our code uses Radiative transfer simulation to fit the SED and ALMA continuum images to obtain the best-fit parameter of the Protoplanetary disk.
+Our code is developed to fit the SED and ALMA continuum images of protoplanetary disks.
 
 # Flow chart #
 ## Radmc3d_Simulation.py
-1. Set the model parameters values(amin,amax,grainP,grainNum,grainLam,ifkappa) for preparing dust opacity files
-2. Set the grid of model space
-3. Set your model parameters values (flaring, hGas100, hGasLocation, mDisk, dustToGas, turbulence ) for preparing the input file of the dust density
-4. Set auxiliary files for radmc3d(radmc.inp,dust_opac.inp,wavelength_micron.inp,stars.inp)
-5. Run the thermal simulation to get the dust temperature distribution (radmc3d mctherm)
-6. Simulate the continuum image, and compare the model brightness profile with the observed brightness profile
-7. Update the dust surface density (see section 4.2 in Li+ 2023MNRAS.518.6092L)
-8. Obtain the converaged dust surface density
-9. Simulate the finall SED and continuum image, and calculate the chi2_SED and chi2_image
+1. Set the model parameter values (for amin, amax, grainP, grainNum, grainLam, ifkappa) for calculating dust opacities.
+2. Set the grid of model space (number of radial and vertical grid points).
+3. Set the model parameter values (flaring, hGas100, hGasLocation, mDisk, dustToGas, turbulence), and assume an initial dust surface density, and prepare the input file of the dust density (i.e. dust_density.inp). The equations are taken from the equation 1 in Liu+ 2022
+4. Prepare auxiliary files for radmc3d(radmc.inp,dust_opac.inp,wavelength_micron.inp,stars.inp).
+5. Run the thermal simulation to get the dust temperature distribution (radmc3d mctherm).
+6. Simulate the continuum image, and compare the model radial intensity profile with the observed intensity profile.
+7. Update the dust surface density (see section 4.2 in Li+ 2023MNRAS.518.6092L).
+8. interate the steps from 3 to 7, until the dust surface density is converaged.
+9. Once the dust density is converaged (typically with 12 iterations), simulate the final SED and continuum image, and calculate the chi2_SED and chi2_image.
 
 ## Radmc3d_Simulation_mult.py
 Multi-process programs can determine the fitting results for multiple models within the parameter space.
@@ -24,7 +24,7 @@ python3.X
 ## package ##
 Our code contains a large amount of code from the DHSHARP and RADMC3D packages.
 
-DSHARP can be downloaded through:
+dsharp_opac can be downloaded through:
         
         pip3 install dsharp_opac
 
@@ -38,7 +38,7 @@ manual of RADMC-3D can be found:
 ## 0.Example ##
 You can execute the Radmc3d_Simulation.py file.
 
-The DS_Tau_b6avgf.dat file represents the radial distribution of observed flux, while the DS_Tau.txt file represents the observed Spectral Energy Distribution (SED).
+The DS_Tau_b6avgf.dat file gives the radial intensity profile of DS Tau that is extracted from the ALMA band6 continuum image, while the DS_Tau.txt file is the observed Spectral Energy Distribution (SED) of DS Tau.
 
 ## 1.Configuring the environment: This determines the program's working directory ##
 Related parameters: pathIn
@@ -54,9 +54,9 @@ The observation files for sed and image should be placed in the pathOut location
 
 Tip: pathOut must end in '/'
 
-The SED observation file consists of three columns. The first column represents the wavelength of each observation [um], the second column contains the corresponding measured values at each wavelength [Jy], and the third column represents the measurement errors [Jy].
+The SED file consists of three columns. The first column represents the wavelength [um], the second column contains the observed flux densities [Jy], and the third column represents the errors [Jy].
 
-The radial profile of flux observation file consists of three columns. The first column represents the distance to the young star [AU], the second column contains the corresponding measured values at each radii [mJy/beam], and the third column represents the measurement errors [mJy/beam].
+The radial intensity profile file consists of three columns. The first column represents the distance to the central star [AU], the second column contains the corresponding intensity [mJy/beam], and the third column represents the errors [mJy/beam].
                   
 ## 2.Set parameters ##
 There are four primary parameter categories: dust properties, grid settings, disk characteristics, and parameters for calculating the Spectral Energy Distribution (SED) and continuous emission images of the dust.
@@ -68,9 +68,9 @@ amax: Maximum size of dust [cm]
 
 grainP: -3.5
 
-grainNum: The quantity of dust in logarithmic space 
+grainNum: The number of dust grain sizes. We typically take 32.
 
-grainLam: The wavelength range of the absorption and scattering coefficients of dust
+grainLam: The wavelength range of the absorption and scattering coefficients of dust. It is typically from 0.1 micron to 10000 micron.
     
 ### Grid
 rin,rout: The maximum and minimum values of grid points on the radial direction of the disk. This value can exceed the inner and outer radii of the disk, but our program sets the range of radial grid points to be the same as the inner and outer radii of the disk.
@@ -86,7 +86,7 @@ flaring: flaring index of the disk.
 
 **Please note that when the value is set to 0.1, it corresponds to a flaring index of 1.1.**
 
-surfaceDensityP: The power-law exponent of surface density is less significant during the fitting of continuous dust images, as the density can be adjusted accordingly.
+surfaceDensityP: The **initial** power-law exponent of the dust surface density. Since the dust surface density is iteraterd during the fitting process, it is not important. We typically take -0.5.
 
 mDisk: This parameter represents the combined mass of the protoplanetary disk, encompassing both the dust and gas components.
 

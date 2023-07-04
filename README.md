@@ -57,7 +57,9 @@ nx(y,z): The number of grid points in each dimension. Corresponds to x (y, z) bo
 ### Disk ###
 hGas100,hGasLocation: The scale height of the gas at a specific location is determined. The default value is set as 0.1 and 100, representing a scale height of 10 au at a distance of 100 au.
 
-flaring: flaring index of the disk. `#ffffff` Please note that when the value is set to 0.1, it corresponds to a flaring index of 1.1.
+flaring: flaring index of the disk. 
+
+**Please note that when the value is set to 0.1, it corresponds to a flaring index of 1.1.**
 
 surfaceDensityP: The power-law exponent of surface density is less significant during the fitting of continuous dust images, as the density can be adjusted accordingly.
 
@@ -69,7 +71,9 @@ turbulence: turbulence
     
 ### SED and Image ###
 
-SEDLam: This parameter specifies the wavelength(s) used for calculating the Spectral Energy Distribution (SED). The comparison between the observed SED and the model-calculated SED during iterations determines the updated disk mass. Please note that: If multiple wavelengths are considered, they can be listed, with the fitted wavelength(s) placed as the last element(s) in the list.
+SEDLam: This parameter specifies the wavelength(s) used for calculating the Spectral Energy Distribution (SED). The comparison between the observed SED and the model-calculated SED during iterations determines the updated disk mass. 
+
+**Please note that: If multiple wavelengths are considered, they can be listed, with the fitted wavelength(s) placed as the last element(s) in the list.**
 
 seds,flux: These two parameters refer to the observed SED and the observed flux extracted radially along the disk.   
 
@@ -79,9 +83,9 @@ pixelNum, sizeau, pixelSize: During the fitting process in the code, a set of fi
 
 imageLam,beamMajor,beamMinor: The band of the generated image and the size of the beam.
 
-        Please note that: 
-            1. Multiple band images can be generated, but it is important to ensure that the number of elements in the imageLam, beamMajor, and beamMinor lists are consistent and matching.
-            2. The fitted wavelength(s) should be placed as the last element(s) in the list.
+**Please note that:**
+**1. Multiple band images can be generated, but it is important to ensure that the number of elements in the imageLam, beamMajor, and beamMinor lists are consistent and matching.**
+**2. The fitted wavelength(s) should be placed as the last element(s) in the list.**
                     
 ### Star and wavelength ###
 see Radmc3d manual 
@@ -95,7 +99,7 @@ rstar: The radius of a young star.
 wavelength:  The wavelength of light emitted by young stars 
     
         
-        Please take note that these parameters will generate two files: star.inp and wavelength_micron.inp. If you plan to modify the star.inp file, it is crucial to ensure that the wavelength specified in that file matches the wavelength in the wavelength_micron.inp file. It is important to maintain consistency between the two files; otherwise, radmc3d may encounter errors during execution.
+**Please take note that these parameters will generate two files: star.inp and wavelength_micron.inp. If you plan to modify the star.inp file, it is crucial to ensure that the wavelength specified in that file matches the wavelength in the wavelength_micron.inp file. It is important to maintain consistency between the two files; otherwise, radmc3d may encounter errors during execution.**
 
     
 ### radmc.inp control file parameter
@@ -179,7 +183,7 @@ If you want to run a multiprocess program to search for parameter space, you can
             
 
 
-        Please note that multi process programs should be set based on the number of CPU cores. The required number of cores is poolNum * setthreads. For example, if the parameters are pool (5) and setthread = 8, the required cores are 5 * 8=40.
+**Please note that multi process programs should be set based on the number of CPU cores. The required number of cores is poolNum * setthreads. For example, if the parameters are pool (5) and setthread = 8, the required cores are 5 * 8=40.**
 
 
     

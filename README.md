@@ -102,9 +102,9 @@ seds,flux: These two parameters refer to the observed SED and the observed flux 
 
 incl, PA, dpc:  The inclination, position angle, and distance of the protoplanetary disk.
 
-pixelNum, sizeau, pixelSize: During the fitting process in the code, a set of fitted images will be generated. These three parameters correspond to the number of pixels in the image, the total size of the image in astronomical units (AU), and the size of each pixel in AU.
+pixelNum, sizeau: During the fitting process in the code, a set of fitted images will be generated. These three parameters correspond to the number of pixels in the image, the total size of the image in astronomical units (AU).
 
-imageLam,beamMajor,beamMinor: The band of the generated image and the size of the beam.
+imageLam,beamMajor,beamMinor,beamPad: The band of the simulated image, and the size of the beam, position angle of the beam.
 
 **Please note that:**
 

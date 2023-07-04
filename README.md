@@ -190,12 +190,14 @@ Files for each step(iteration_warehouse):
 4.time_section_x
 
 The last step of the flux and sed files:
+
 1.flux_R_x.txt
 
 2.sed_x.txt
 
 
 Chi2 with observed values:
+
 1.ChiFlux.txt
 
 2.ChiSed.txt

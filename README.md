@@ -2,9 +2,8 @@
 Our code uses Radiative transfer simulation to fit the SED and ALMA continuous images to obtain the best-fit parameter of the Protoplanetary disk.
 
 # Flow chart #
-1. dust files ---- 2. grid ---- 3. pho ---- 4. set_radmc3d ---- 5. mctherm ---- 6. flux_r ---- 7. update pho ---- 8. chi^2
-                                                                                     |              |
-                                                                                      --------------
+1. dust files ---- 2. grid ---- 3. pho ---- 4. set_radmc3d ---- 5. mctherm ---- 6. flux_r ---- 7. update pho(5-6-7) ---- 8. chi^2
+
 
 # Requirements #
 

@@ -1,8 +1,19 @@
 # Introduction #
-Our code uses Radiative transfer simulation to fit the SED and ALMA continuous images to obtain the best-fit parameter of the Protoplanetary disk.
+Our code uses Radiative transfer simulation to fit the SED and ALMA continuum images to obtain the best-fit parameter of the Protoplanetary disk.
 
 # Flow chart #
-1. dust files ---- 2. grid ---- 3. pho ---- 4. set_radmc3d ---- 5. mctherm ---- 6. flux_r ---- 7. update pho(5-6-7) ---- 8. chi^2
+## Radmc3d_Simulation.py
+1. Set the model parameters values(amin,amax,grainP,grainNum,grainLam,ifkappa) for preparing dust opacity files
+2. Set the grid of model space
+3. Set your model parameters values (flaring, hGas100, hGasLocation, mDisk, dustToGas, turbulence ) for preparing the input file of the dust density
+4. Set auxiliary files for radmc3d(radmc.inp,dust_opac.inp,wavelength_micron.inp,stars.inp)
+5. Run the thermal simulation to get the dust temperature distribution (radmc3d mctherm)
+6. Simulate the continuum image, and compare the model brightness profile with the observed brightness profile
+7. Update the dust surface density (see section 4.2 in Li+ 2023MNRAS.518.6092L)
+8. Obtain the converaged dust surface density
+9. Simulate the finall SED and continuum image, and calculate the chi2_SED and chi2_image
+
+## Radmc3d_Simulation_mult.py
 
 
 # Requirements #
@@ -30,9 +41,19 @@ You can execute the Radmc3d_Simulation.py file.
 The DS_Tau_b6avgf.dat file represents the radial distribution of observed flux, while the DS_Tau.txt file represents the observed Spectral Energy Distribution (SED).
 
 ## 1.Configuring the environment: This determines the program's working directory ##
+Related parameters: pathIn
+Location of the folder for dust_kappa_x.inp files
+Tip: pathIn must end in '/'
+
 Related parameters: pathOut
+Location of the folder for output files
+The observation files for sed and image should be placed in the pathOut location.
 Tip: pathOut must end in '/'
-                        
+
+The SED observation file consists of three columns. The first column represents the wavelength of each observation [um], the second column contains the corresponding measured values at each wavelength [Jy], and the third column represents the associated measurement errors [Jy].
+
+The radial profile of flux observation file consists of three columns. The first column represents the distance to the young star [AU], the second column contains the corresponding measured values at each radii [mJy/beam], and the third column represents the associated measurement errors [mJy/beam].
+                  
 ## 2.Set parameters ##
 There are four primary parameter categories: dust properties, grid settings, disk characteristics, and parameters for calculating the Spectral Energy Distribution (SED) and continuous emission images of the dust.
     
@@ -170,7 +191,7 @@ The last step of the flux and sed files:
 2.sed_x.txt
 
 
-Chi square with observed values:
+Chi2 with observed values:
 1.ChiFlux.txt
 
 2.ChiSed.txt

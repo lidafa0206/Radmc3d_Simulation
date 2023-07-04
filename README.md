@@ -107,7 +107,9 @@ pixelNum, sizeau, pixelSize: During the fitting process in the code, a set of fi
 imageLam,beamMajor,beamMinor: The band of the generated image and the size of the beam.
 
 **Please note that:**
+
 **1. Multiple band images can be generated, but it is important to ensure that the number of elements in the imageLam, beamMajor, and beamMinor lists are consistent and matching.**
+
 **2. The fitted wavelength(s) should be placed as the last element(s) in the list.**
                     
 ### Star and wavelength ###

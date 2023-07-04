@@ -54,9 +54,9 @@ The observation files for sed and image should be placed in the pathOut location
 
 Tip: pathOut must end in '/'
 
-The SED observation file consists of three columns. The first column represents the wavelength of each observation [um], the second column contains the corresponding measured values at each wavelength [Jy], and the third column represents the associated measurement errors [Jy].
+The SED observation file consists of three columns. The first column represents the wavelength of each observation [um], the second column contains the corresponding measured values at each wavelength [Jy], and the third column represents the measurement errors [Jy].
 
-The radial profile of flux observation file consists of three columns. The first column represents the distance to the young star [AU], the second column contains the corresponding measured values at each radii [mJy/beam], and the third column represents the associated measurement errors [mJy/beam].
+The radial profile of flux observation file consists of three columns. The first column represents the distance to the young star [AU], the second column contains the corresponding measured values at each radii [mJy/beam], and the third column represents the measurement errors [mJy/beam].
                   
 ## 2.Set parameters ##
 There are four primary parameter categories: dust properties, grid settings, disk characteristics, and parameters for calculating the Spectral Energy Distribution (SED) and continuous emission images of the dust.

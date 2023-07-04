@@ -42,12 +42,16 @@ The DS_Tau_b6avgf.dat file represents the radial distribution of observed flux, 
 
 ## 1.Configuring the environment: This determines the program's working directory ##
 Related parameters: pathIn
+
 Location of the folder for dust_kappa_x.inp files
+
 Tip: pathIn must end in '/'
 
 Related parameters: pathOut
 Location of the folder for output files
+
 The observation files for sed and image should be placed in the pathOut location.
+
 Tip: pathOut must end in '/'
 
 The SED observation file consists of three columns. The first column represents the wavelength of each observation [um], the second column contains the corresponding measured values at each wavelength [Jy], and the third column represents the associated measurement errors [Jy].

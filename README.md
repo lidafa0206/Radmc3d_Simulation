@@ -88,11 +88,11 @@ flaring: flaring index of the disk.
 
 surfaceDensityP: The **initial** power-law exponent of the dust surface density. Since the dust surface density is iteraterd during the fitting process, it is not important. We typically take -0.5.
 
-mDisk: This parameter represents the combined mass of the protoplanetary disk, encompassing both the dust and gas components.
+mDisk: This parameter is the total mass of the disk, i.e.  dust + gas mass, assuming the dust-to-gas ratio of 0.01.
 
-dustToGas: The parameter signifies the ratio between the mass of dust and the mass of gas within the protoplanetary disk, with a default value set at 0.01.
+dustToGas: The parameter is the ratio between the mass of dust and the mass of gas within the protoplanetary disk, with a default value set at 0.01.
 
-turbulence: turbulence 
+turbulence: turbulence level. default:1e-4
     
 ### SED and Image ###
 

@@ -5,11 +5,11 @@ Our code is developed to fit the SED and ALMA continuum images of protoplanetary
 ## Radmc3d_Simulation.py
 1. Set the model parameter values (for amin, amax, grainP, grainNum, grainLam, ifkappa) for calculating dust opacities.
 2. Set the grid of model space (number of radial and vertical grid points).
-3. Set the model parameter values (flaring, hGas100, hGasLocation, mDisk, dustToGas, turbulence), and assume an initial dust surface density, and prepare the input file of the dust density (i.e. dust_density.inp). The equations are taken from the equation 1 in Liu+ 2022
+3. Set the model parameter values (flaring, hGas100, hGasLocation, mDisk, dustToGas, turbulence), and assume an initial dust surface density, and prepare the input file of the dust density (i.e. dust_density.inp). The equations are taken from the equation 10 and 11 in Liu+ 2022, A&A, 668, A175.
 4. Prepare auxiliary files for radmc3d(radmc.inp,dust_opac.inp,wavelength_micron.inp,stars.inp).
 5. Run the thermal simulation to get the dust temperature distribution (radmc3d mctherm).
 6. Simulate the continuum image, and compare the model radial intensity profile with the observed intensity profile.
-7. Update the dust surface density (see section 4.2 in Li+ 2023MNRAS.518.6092L).
+7. Update the dust surface density (see section 4.2 in Li+ 2023, MNRAS, 518, 6092L).
 8. interate the steps from 3 to 7, until the dust surface density is converaged.
 9. Once the dust density is converaged (typically with 12 iterations), simulate the final SED and continuum image, and calculate the chi2_SED and chi2_image.
 

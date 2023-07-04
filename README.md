@@ -108,7 +108,7 @@ imageLam,beamMajor,beamMinor,beamPad: The band of the simulated image, and the s
 
 **Please note that:**
 
-**1. Multiple band images can be generated, but it is important to ensure that the number of elements in the imageLam, beamMajor, and beamMinor lists are consistent and matching.**
+**1. You have the flexibility to assign distinct beam sizes for images in different bands. Simply add the desired elements to the respective lists. .**
 
 **2. The fitted wavelength(s) should be placed as the last element(s) in the list.**
                     

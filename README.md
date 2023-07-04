@@ -120,7 +120,7 @@ setthreads:  Number of CPU cores used simultaneously.
 ## 3.Function  ##
 createDSHARPGrain: Generate a customized chemical composition (DHSHARP), a specific number, and a designated size of dust particles. Consuming a lot of time. 
 
-        If you want to skip this step, please set ifkappa to 0 and ensure that there are kappa files in the pathIn folder.
+**If you want to skip this step, please set ifkappa to 0 and ensure that there are kappa files in the pathIn folder.**
 
                
 calculateDustMassWeight: Allocate the disk quality among individuals based on the size of the dust particles.

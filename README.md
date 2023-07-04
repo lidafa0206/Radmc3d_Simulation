@@ -98,8 +98,6 @@ turbulence: turbulence
 
 SEDLam: This parameter specifies the wavelength(s) used for calculating the Spectral Energy Distribution (SED). The comparison between the observed SED and the model-calculated SED during iterations determines the updated disk mass. 
 
-**Please note that: If multiple wavelengths are considered, they can be listed, with the fitted wavelength(s) placed as the last element(s) in the list.**
-
 seds,flux: These two parameters refer to the observed SED and the observed flux extracted radially along the disk.   
 
 incl, PA, dpc:  The inclination, position angle, and distance of the protoplanetary disk.

@@ -14,7 +14,7 @@ Our code uses Radiative transfer simulation to fit the SED and ALMA continuum im
 9. Simulate the finall SED and continuum image, and calculate the chi2_SED and chi2_image
 
 ## Radmc3d_Simulation_mult.py
-Multi-process programs can be utilized to concurrently determine the optimal fitting results for multiple models within the parameter space.
+Multi-process programs can determine the fitting results for multiple models within the parameter space.
 
 # Requirements #
 

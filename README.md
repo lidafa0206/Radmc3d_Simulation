@@ -221,6 +221,11 @@ If you want to run a multiprocess program to search for parameter space, you can
 
 **Please note that multi process programs should be set based on the number of CPU cores. The required number of cores is poolNum * setthreads. For example, if the parameters are pool (5) and setthread = 8, the required cores are 5 * 8=40.**
 
+# Acknowledgements
+If you want to use this code, please:
+
+1. Contact the author Yao Liu or DafaLi via email yliu@pmo.ac.cn or dfli@pmo.ac.cn.
+2. Cite Liu+ 2022, A&A, 668, A175 and Li+ 2023, MNRAS, 518, 6092L.
 
     
 

@@ -9,10 +9,10 @@ Our code is developed to fit the SED and ALMA continuum images of protoplanetary
    
    The density of dust is calculated by:
    $$\rho(R, z, a)=\frac{\Sigma(R, a)}{\sqrt{2 \pi} h(R, a)} \exp \left[-\frac{1}{2}\left(\frac{z}{h(R, a)}\right)^2\right]$$
-   $`\Sigma(R, a)`$ and $`h(R,a)`$ is:
+   $`a`$ is the dust of different sizes. $`z`$ is the height direction of the disk. The dust surface density $`\Sigma(R, a)`$ and the dust scale height $`h(R,a)`$ is:
    $$\Sigma(R, a)=\Sigma_0(a)\left(\frac{R}{100 \mathrm{AU}}\right)^{-\gamma}$$
    $$h(R, a)=H_{\mathrm{gas}}\left(1+\frac{\mathrm{St}}{\alpha_{\mathrm{turb}}} \frac{1+2 \mathrm{St}}{1+\mathrm{St}}\right)^{-1 / 2}$$
-   where $`St`$ is Stokes number $`= \frac{\pi}{2} \frac{\rho_{\text {grain }} a}{\sum_{\text {gas }}(R)}`$. $`\Sigma_0(a)`$ is related to the size of the dust, and the mass ratio obtained for each dust of different sizes is:
+   where $`R`$ is the radial direction of the disk. $`\alpha_{\mathrm{turb}}`$ is the turbulence. $`St`$ is Stokes number $`= \frac{\pi}{2} \frac{\rho_{\text {grain }} a}{\sum_{\text {gas }}(R)}`$. $`H_{\mathrm {gas}}`$ is the gas surface density $`H_{\mathrm{gas}}=H_{100 \cdot a_{\min }}\left(\frac{R}{100 \mathrm{AU}}\right)^\beta .`$. $`\Sigma_0(a)`$ is related to the size of the dust, and the mass ratio obtained for each dust of different sizes is:
    $$f\left(a_j\right)=\frac{\int_{a_0}^{a_1} \frac{4 \pi}{3} \rho_{\text {grain }} n(a) a^3 \mathrm{~d} a}{\int_{a_{\text {lower }}}^{a_{\text {uppe }}} \frac{4 \pi}{3} \rho_{\text {grain }} n(a) a^3 \mathrm{~d} a}$$
 
 5. Prepare auxiliary files for radmc3d(radmc.inp,dust_opac.inp,wavelength_micron.inp,stars.inp).

@@ -9,12 +9,14 @@ from astropy.io import fits
 import time
 import multiprocess as mul
 
-def createSEDLam(pathOut,SEDLam):
-    file_path = '%scamera_wavelength_micron.inp' %pathOut
+
+def createSEDLam(pathOut, SEDLam):
+    file_path = '%scamera_wavelength_micron.inp' % pathOut
     with open(file_path, "w") as file:
-        file.write("%s\n" %(len(SEDLam)))
+        file.write("%s\n" % (len(SEDLam)))
         for lam in SEDLam:
-            file.write("%s\n" %lam)
+            file.write("%s\n" % lam)
+
 
 def makeRadSet(pathOut,
                nphot=10000000,
@@ -24,7 +26,7 @@ def makeRadSet(pathOut,
                camera_min_drr=0.1,
                modified_random_walk=1,
                istar_sphere=1,
-               setthreads=1
+               setthreads=8
                ):
     # define path
     file_path = "%sradmc.inp" % pathOut
@@ -38,10 +40,9 @@ def makeRadSet(pathOut,
         file.write("camera_min_drr =  %s\n" % camera_min_drr)
         file.write("modified_random_walk =  %s\n" % modified_random_walk)
         file.write("istar_sphere =  %s\n" % istar_sphere)
-        file.write("setthreads = %s\n" %setthreads) #multthreads
+        file.write("setthreads = %s\n" % setthreads)
 
-
-    print("set_radmc.inp：{%s}" %pathOut)
+    print("set_radmc.inp：{%s}" % pathOut)
 
 
 def makeOpacity(pathOut, grainNum):
@@ -64,13 +65,14 @@ def makeOpacity(pathOut, grainNum):
             # Separator
             wfile.write('%s\n' % '----------------------------------------------------------------------------')
 
-def makeStarandWavelength(pathOut,rstar,mstar,wavelength,Teff):
+
+def makeStarandWavelength(pathOut, rstar, mstar, wavelength, Teff):
     fname = "%sstars.inp" % pathOut
     with open(fname, 'w') as wfile:
         wfile.write('%d\n' % 2)
-        wfile.write('%d %d\n' % (1,len(wavelength)))
+        wfile.write('%d %d\n' % (1, len(wavelength)))
         wfile.write('%.9e %.9e %.9e %.9e %.9e\n' % (rstar, mstar,
-                                                        0, 0, 0))
+                                                    0, 0, 0))
 
         wfile.write('%s\n' % ' ')
         for ilam in range(len(wavelength)):
@@ -85,6 +87,7 @@ def makeStarandWavelength(pathOut,rstar,mstar,wavelength,Teff):
             wfile.write('%d\n' % len(wavelength))
             for ilam in range(len(wavelength)):
                 wfile.write('%.9e\n' % wavelength[ilam])
+
 
 def createDSHARPGrain(pathOut, lam, amid, a1, a2, p, num, na=500):
     # os.chdir('/Users/lidafa/Desktop/dsharp/dsharp_opac-master 2/notebooks')
@@ -489,7 +492,7 @@ def writeSpatialGrid(fname, crd_sys, act_dim, xi, yi, zi, old=False):
         # fname = '%s/amr_grid.inp' %path
 
         print('Writing ' + fname)
-        with open(fname + 'amr_grid.inp', 'w') as wfile:
+        with open('%samr_grid.inp' %fname, 'w') as wfile:
             # Format number
             wfile.write('%d\n' % 1)
             # AMR style (0=regular  NO AMR)
@@ -518,112 +521,71 @@ def writeSpatialGrid(fname, crd_sys, act_dim, xi, yi, zi, old=False):
                 wfile.write('%.9e\n' % zi[i])
         wfile.close()
 
+def calculateSigma(x,xi,y,yi,hrpivot,plsig1,mdisk):
+    sig = np.power((x/hrpivot), plsig1)
+    sigSqua = np.pi*(xi[1:]**2 - xi[:-1]**2)
+    sigMtot = (sig * sigSqua).sum()
+    sig = sig * mdisk / sigMtot
 
-def calculatePho(pathOut, x, y, z, xi, yi, zi, hrdisk, hrpivot, plh, plsig1, rdisk, mdisk, grainSize, alpha, sig0=1,
-                 sigma_type=0):
+    return sig
+
+def calculateDustPho(pathOut,x,xi, y,yi,hrdisk, hrpivot, plh, plsig1, grainSize, alpha, ilayer, mdisk, dustTogas,sig0,):
     nx = len(x)
     ny = len(y)
-    nz = len(z)
-    bgdens = 1e-30  # Background density (g/cm^3)
-    ppar = ['prim_rout', 'sig0', 'sigma_type', 'srim_rout', 'srim_plsig', 'mdisk']
-    prim_rout = 0
-    rr, th = np.meshgrid(x, y)
-    zz = rr * np.cos(th)
-    rcyl = rr * np.sin(th)
+    rhodust = np.zeros([nx, ny])
+    hrstore = np.zeros(nx)
+    hfactor = np.zeros(nx)
 
-    # Calculate the surface density
-    sigmaGas = np.zeros([nx, ny, nz], dtype=np.float64)
-    # Calculate sigma from sig0, rdisk and plsig1
-    if 'sig0' in ppar:
-        if sig0 != 0.:
-            if 'sigma_type' in ppar:
-                if sigma_type == 0:
-                    dum1 = sig0 * (rcyl / rdisk) ** plsig1
-                else:
-                    expterm = np.exp(-(rcyl / rdisk) ** (2.0 - plsig1))
-                    dum1 = sig0 * (rcyl / rdisk) ** (-plsig1) * expterm
+    sigmaGas = calculateSigma(x, xi, y, yi, hrpivot, plsig1, mdisk)
+    np.savetxt('sigmaGas.txt', np.transpose([x/natconst.au,sigmaGas]))
+    for ix in range(nx):
+        hrstore[ix] = hrdisk * (x[ix] / hrpivot) ** plh
 
-            else:
-                dum1 = sig0 * (rcyl / rdisk) ** plsig1
+    stnumber = 1.675 * grainSize * np.pi / sigmaGas / 2
 
-        dum = dum1
-        dum = dum.swapaxes(0, 1)
-        for iz in range(nz):
-            sigmaGas[:, :, iz] = dum
+    for ix in range(nx):
+        hfactor[ix] = (1.00 + (stnumber[ix] / alpha) * (1.00 + 2.00 * stnumber[ix]) / (1.00 + stnumber[ix])) ** -0.5
+        #hfactor[i] = np.power(ftmp,-0.5)
 
-    # Calculate the scale height
-    hGas = np.zeros([nx, ny, nz], dtype=np.float64)
-    dum = hrdisk * (rcyl / hrpivot) ** plh * rcyl
+    np.savetxt('layer%s.txt' %(ilayer),np.transpose([x/natconst.au,stnumber,hrstore,hfactor]))
 
-    dum = dum.swapaxes(0, 1)
-    for iz in range(nz):
-        hGas[:, :, iz] = dum
+    sigmaDust = calculateSigma(x, xi, y, yi, hrpivot, plsig1, mdisk*dustTogas*sig0)
+    np.savetxt('sigmaDust%s.txt' %ilayer, np.transpose([x / natconst.au, sigmaDust]))
 
-    St = np.zeros([nx, ny, nz], dtype=np.float64)
-    dum = 1.675 * grainSize * np.pi / sigmaGas / 2.0
-    for iz in range(nz):
-        St[:, :, iz] = dum[:, :, 0]
+    for ir in range(nx):
+        hr = hrstore[ir] * hfactor[ir]
+        rhodust[ir, :] = 1 /np.sqrt(2*np.pi) * sigmaDust[ir] * np.exp(-0.5 * ((np.pi/2-y[:]) / hr) ** 2) / (hr * x[ir])
 
-    hDust = np.zeros([nx, ny, nz], dtype=np.float64)
-    dum = hGas * (1 + (St / alpha) * ((1 + 2 * St) / (1 + St))) ** -0.5
-    for iz in range(nz):
-        hDust[:, :, iz] = dum[:, :, 0]
+    return rhodust
 
-    z0 = np.zeros([nx, nz, ny], dtype=np.float64)
-    rho = np.zeros([nx, ny, nz], dtype=np.float64)
-    for iz in range(nz):
-        for iy in range(ny):
-            rho[:, iy, iz] = sigmaGas[:, iy, iz] / (hDust[:, iy, iz] * np.sqrt(2.0 * np.pi)) * \
-                             np.exp(-0.5 * ((zz[iy, :]) - z0[:, iz, iy]) * ((zz[iy, :]) - z0[:, iz, iy])
-                                    / (hDust[:, iy, iz] * hDust[:, iy, iz])) + bgdens
+def calculateIterationDustPho(pathOut,x, y,hrdisk, hrpivot, plh, grainSize, alpha, ilayer, dustToGas,sig0,sigmaGas):
+    nx = len(x)
+    ny = len(y)
+    rhodust = np.zeros([nx, ny])
+    hrstore = np.zeros(nx)
+    hfactor = np.zeros(nx)
 
-    # Normalize the disk to mdisk if it is given instead of sig0
-    if 'mdisk' in ppar:
-        if mdisk != 0.:
-            # Calculate the volume of each grid cell
-            vol = getCellVolume(x, y, z, xi, yi, zi)
-            mass = (rho * vol).sum(0).sum(0).sum(0)
-            rho = rho * (mdisk / mass)
+    sigmaDust = sigmaGas * dustToGas * sig0
+    for ix in range(nx):
+        hrstore[ix] = hrdisk * (x[ix] / hrpivot) ** plh
 
-            # if np.abs(ybound[-1] - (np.pi / 2.)) < 1e-8:
-            #     rho = rho * 0.5
+    stnumber = 1.675 * grainSize * np.pi / sigmaGas / 2
 
+    for ix in range(nx):
+        hfactor[ix] = (1.00 + (stnumber[ix] / alpha) * (1.00 + 2.00 * stnumber[ix]) / (1.00 + stnumber[ix])) ** -0.5
 
+    np.savetxt('layer%s.txt' %(ilayer),np.transpose([x/natconst.au,stnumber,hrstore,hfactor]))
 
+    np.savetxt('sigmaDust%s.txt' % ilayer, np.transpose([x / natconst.au, sigmaDust]))
 
-    # for igap in range(len(gap_rout)):
-    #     for ix in range(nx):
-    #         if (x[ix] >= gap_rin[igap]) & (x[ix] <= gap_rout[igap]):
-    #             rho[ix, :, :] = rho[ix, :, :] * gap_drfact[igap]
-    return rho
-
+    for ir in range(nx):
+        hr = hrstore[ir] * hfactor[ir]
+        rhodust[ir, :] = 1 / np.sqrt(2 * np.pi) * sigmaDust[ir] * np.exp(-0.5 * ((np.pi / 2 - y[:]) / hr) ** 2) / (
+                    hr * x[ir])
+    return rhodust
 
 def getCellVolume(x, y, z, xi, yi, zi):
-    """Calculates the volume of grid cells.
-
-    """
-
-    # if act_dim[0] == 0:
-    #     raise ValueError('The first (r) dimension of a shserical grid is switched off')
-    # elif act_dim[1] == 0:
-    #     if act_dim[2] == 0:
-    #         vol = np.zeros([nx, ny, nz], dtype=np.float64)
-    #         diff_r3 = xi[1:] ** 3 - xi[:-1] ** 3
-    #         diff_cost = 2.0
-    #         diff_phi = 2. * np.pi
-    #         for ix in range(nx):
-    #             vol[ix, 0, 0] = 1. / 3. * diff_r3[ix] * diff_cost * diff_phi
-    #
-    #     else:
-    #         vol = np.zeros([nx, ny, nz], dtype=np.float64)
-    #         diff_r3 = xi[1:] ** 3 - xi[:-1] ** 3
-    #         diff_cost = 2.0
-    #         diff_phi = zi[1:] - zi[:-1]
-    #         for ix in range(nx):
-    #             for iz in range(nz):
-    #                 vol[ix, 0, iz] = 1. / 3. * diff_r3[ix] * diff_cost * diff_phi[iz]
-
-    # elif act_dim[2] == 0:
+    """Calculates the volume of grid cells."""
     nx = len(x)
     ny = len(y)
     nz = len(z)
@@ -635,22 +597,10 @@ def getCellVolume(x, y, z, xi, yi, zi):
         for iy in range(ny):
             vol[ix, iy, :] = 1. / 3. * diff_r3[ix] * diff_cost[iy] * diff_phi
 
-    # else:
-    #     nx = len(x)
-    #     ny = len(y)
-    #     nz = len(z)
-    #     vol = np.zeros([nx, ny, nz], dtype=np.float64)
-    #     diff_r3 = xi[1:] ** 3 - xi[:-1] ** 3
-    #     diff_cost = np.cos(yi[:-1]) - np.cos(yi[1:])
-    #     diff_phi = zi[1:] - zi[:-1]
-    #     for ix in range(nx):
-    #         for iy in range(ny):
-    #             vol[ix, iy, :] = 1. / 3. * diff_r3[ix] * diff_cost[iy] * diff_phi
-
     return vol
 
 
-def writeDustDensity(pathOut, sigmad,n):
+def writeDustDensity(pathOut, sigmad, n):
     f = open('%sdust_density.inp' % pathOut, 'w')
     f.write('1\n')
     f.write('%s\n' % (len(sigmad[:, 0, 0, 0]) * len(sigmad[0, :, 0, 0]) * len(sigmad[0, 0, :, 0])))
@@ -660,10 +610,10 @@ def writeDustDensity(pathOut, sigmad,n):
             for i in range(len(sigmad[:, 0, 0, 0])):
                 f.write('%.9e\n' % sigmad[i, j, 0, z])
     f.close()
-    os.system('cp dust_density.inp ./iteration_warehouse/dust_density_%s.inp' %n)
+    os.system('cp dust_density.inp ./iteration_warehouse/dust_density_%s.inp' % n)
 
 
-def extractedFlux(PA, incl, lad, beamMo, beamMi, rdisk, pixelNum, pixelsize,n):
+def extractedFlux(PA, incl, lad, beamMo, beamMi, rdisk, pixelNum, pixelsize, n):
     for la, beam1, beam2 in zip(lad, beamMo, beamMi):
         hdulist = fits.open('image_con_%s.fits' % (la))
         tdata = hdulist[0].data
@@ -680,7 +630,7 @@ def extractedFlux(PA, incl, lad, beamMo, beamMi, rdisk, pixelNum, pixelsize,n):
         for r in R:
             theta = np.linspace(0, 2 * np.pi, num=181, endpoint=True)
             # if theta[-1] != 2*np.pi:
-            #     theta = np.append(theta,2*np.pi)
+            #     theta = np.append(theta,2*np.pi
             for i in theta:
                 x = r * np.cos(i)
                 y = np.cos(incl / 180. * np.pi) * r * np.sin(i)
@@ -709,7 +659,7 @@ def extractedFlux(PA, incl, lad, beamMo, beamMi, rdisk, pixelNum, pixelsize,n):
                 fluxrd = tdata[0][yy1][xx1]
                 flux = fluxlu * (xx1 - xx) * (yy1 - yy) / (xx1 - xx0) / (yy1 - yy0) + fluxld * (xx - xx0) \
                        * (yy1 - yy) / (xx1 - xx0) / (yy1 - yy0) + fluxru * (yy - yy0) * (xx1 - xx) / (xx1 - xx0) / (
-                                   yy1 - yy0) \
+                               yy1 - yy0) \
                        + fluxrd * (xx - xx0) * (yy - yy0) / (xx1 - xx0) / (yy1 - yy0)
                 flux1.append(flux)
 
@@ -720,17 +670,15 @@ def extractedFlux(PA, incl, lad, beamMo, beamMi, rdisk, pixelNum, pixelsize,n):
             flux3.append(flux2)
 
         R2 = (R) * pixelsize
-        flux3 = [flux3[i] * 1000 * (np.pi / 4 * beam1 * beam2) / (3600 / np.pi * 180) ** 2 / np.log(2) for i in range(len(flux3))] #2mJy
-        #flux3 = [flux3[i] * 1000 for i in range(len(flux3))]
+        flux3 = [flux3[i] * 1000 * (np.pi / 4 * beam1 * beam2) / (3600 / np.pi * 180) ** 2 / np.log(2) for i in
+                 range(len(flux3))]  # 2mJy
+        # flux3 = [flux3[i] * 1000 for i in range(len(flux3))]
         cc = np.transpose([R2, flux3])
-        np.savetxt('flux_R_%s_%s.txt' % (la,n), cc)
+        np.savetxt('flux_R_%s_%s.txt' % (la, n), cc)
         # os.system('cp flux_R_%s.txt ./iteration_warehouse/flux_R_%s_%s.txt' %(la,la,n))
 
 
-
-
 def calculateSED(incl, Pa, dpc, mdisk, n):
-
     # SED
     os.system('radmc3d spectrum incl %s posang %s loadlambda' % (incl, (Pa)))
     sed = analyze.readSpectrum()
@@ -739,43 +687,47 @@ def calculateSED(incl, Pa, dpc, mdisk, n):
     sed[:, 1] = sed[:, 1] * 1.0 * 1.e4 * 2.99792458e10 / sed[:, 0]
     sed1[:, 1] = sed1[:, 1] * 10 ** 23
     np.savetxt('sed_%s.txt' % (n), sed1)
-    #np.savetxt('sed_%s.txt,erg' % (n), sed)
+    # np.savetxt('sed_%s.txt,erg' % (n), sed)
     # mdiskFactor = seds / sed1[-1, 1]
     # mdisk = mdisk * mdiskFactor
 
-    #return mdisk
+    # return mdisk
 
-def calculateImage(incl, Pa, dpc, lamd, beamMa, beamMi, pixelNum, sizeau,beamPad):
-    for lam, beam1, beam2, beamPa in zip(lamd, beamMa, beamMi,beamPad):
+
+def calculateImage(incl, Pa, dpc, lamd, beamMa, beamMi, pixelNum, sizeau, beamPad):
+    for lam, beam1, beam2, beamPa in zip(lamd, beamMa, beamMi, beamPad):
         ##计算image
         os.system('rm image_%s.fits' % lam)
         os.system('rm image_con_%s.fits' % lam)
         os.system('radmc3d image lambda %s incl %s posang %s npixx %s npixy %s sizeau %s secondorder' % (
-        lam, incl, (Pa), pixelNum, pixelNum, sizeau))
+            lam, incl, (Pa), pixelNum, pixelNum, sizeau))
         im = image.readImage()
         im.writeFits('image_%s.fits' % lam)
-        cim = im.imConv(fwhm=[beam1,beam2], pa=beamPa, dpc=dpc)
+        cim = im.imConv(fwhm=[beam1, beam2], pa=beamPa, dpc=dpc)
         cim.writeFits('image_con_%s.fits' % (lam))
 
 
-
-
-def iteration(pathOut,pathkappa,grainNum, incl, PA,beamPad, dpc, mdisk,dustToGas, lam, beamMa,beamMi, sl,sed, flux, pixelNum, sizeau, pixelSize, rdisk):
+def iteration(pathOut, pathkappa, grainNum, incl, PA, beamPad, dpc, mdisk, dustToGas, lam, beamMa, beamMi, sed,
+              flux, pixelNum, sizeau, pixelSize, rdisk,massWeight):
     n = 0
     os.chdir('%s' % pathOut)
-    os.system('mkdir ./iteration_warehouse')
     time_pho = []
     time_start = time.time()
     mdiskiter = []
-    for isize in range(1,grainNum+1):
-        os.system('cp %sdustkappa_%s.inp %s' %(pathkappa,isize,pathOut))
+    for isize in range(1, grainNum + 1):
+        os.system('cp %sdustkappa_%s.inp %s' % (pathkappa, isize, pathOut))
     for n in range(13):
+        os.system('cp sigmaGas.txt ./iteration_warehouse/sigmaGas_%s.txt' % n)
+        for ig in range(grainNum):
+            os.system('mv sigmaDust%s.txt ./iteration_warehouse/sigmaDust_%s_iter_%s.txt' % (ig, ig, n))
+            os.system('mv layer%s.txt ./iteration_warehouse/layer_%s_iter_%s.txt' % (ig, ig, n))
+        os.system('cp dust_density.inp ./iteration_warehouse/dust_density_%s.ing' % (n))
         # temperature
         os.system('radmc3d mctherm')
         calculateImage(incl, PA, dpc, lam, beamMa, beamMi, pixelNum, sizeau, beamPad)
-        extractedFlux(PA, incl, lam,  beamMa,  beamMi, rdisk/natconst.au, pixelNum, pixelSize,n)
-        flux3 = np.loadtxt('flux_R_%s_%s.txt' %(lam[-1],n))
-        os.system('mv flux_R_%s_%s.txt ./iteration_warehouse' % (lam[-1],n))
+        extractedFlux(PA, incl, lam, beamMa, beamMi, rdisk / natconst.au, pixelNum, pixelSize, n)
+        flux3 = np.loadtxt('flux_R_%s_%s.txt' % (lam[-1], n))
+        os.system('mv flux_R_%s_%s.txt ./iteration_warehouse' % (lam[-1], n))
         # flux3 = np.loadtxt('flux_R_%s_erg.txt')
         # flux3[:,1] = flux3[:,1]*1000
         fluxs = flux
@@ -799,41 +751,47 @@ def iteration(pathOut,pathkappa,grainNum, incl, PA,beamPad, dpc, mdisk,dustToGas
                 fx.append(fx1)
         np.savetxt('fx%s' % (n), fx)
         os.system('mv fx%s ./iteration_warehouse' % (n))
-        data = analyze.readData(ddens=True, binary=False)
-        rho = data.rhodust.copy()
-        for g in range(grainNum):
-            for t in range(len(grid.y)):
-                rho[:, t, 0, g] *= fx
-        writeDustDensity(pathOut, rho,n)
+        sigGas = np.loadtxt('sigmaGas.txt')
+        sigmaGas = sigGas[:, 1] * fx
+        np.savetxt('sigmaGas.txt', np.transpose([x / natconst.au, sigmaGas]))
+        for i in range(grainNum):
+            phoList[:, :, 0, i] = calculateIterationDustPho(pathOut, x, y, hGas100, hGasLocation, flaring, aList[i], turbulence,i,dustToGas, massWeight[i], sigmaGas)
+        writeDustDensity(pathOut, phoList, n)
         mdust = calculateDustMass(pathOut, grainNum)
-        mdiskiter.append(mdust)
+        mdiskiter.append(mdust/natconst.ms)
 
         time_end = time.time()
         time_pho.append(time_end - time_start)
         np.savetxt('time_section%s' % (n), time_pho)
         os.system('mv time_section%s ./iteration_warehouse' % (n))
 
-        if  max(abs(fx-np.ones(len(fx)))) < 0.05:
+        if max(abs(fx - np.ones(len(fx)))) < 0.05:
             break
+    os.system('cp sigmaGas.txt ./iteration_warehouse/sigmaGas_%s.txt' %n)
+    for ig in range(grainNum):
+        os.system('mv sigmaDust%s.txt ./iteration_warehouse/sigmaDust_%s_iter_%s.txt' %(ig,ig,n))
+        os.system('mv layer%s.txt ./iteration_warehouse/layer_%s_iter_%s.txt' %(ig,ig,n))
+    os.system('cp dust_density.inp ./iteration_warehouse/dust_density_%s.inp' % (n))
+    os.system('cp massWeight ./iteration_warehouse/massWeight')
+    os.system('cp mdustiter ./iteration_warehouse/mdustiter')
 
-    os.system('cp ./iteration_warehouse/flux_R_%s_%s.txt ./flux_R_%s.txt' %(lam[-1],n,lam[-1]))
-    fluxBestfit1 = np.loadtxt('flux_R_%s.txt' %(lam[-1]))
-    fluxBestfit = np.interp(fluxs[:,0],fluxBestfit1[:,0],fluxBestfit1[:,1])
-    chiFlux = (fluxs[:,1]-fluxBestfit)**2 / (fluxs[:,1]*0.1)**2
-    np.savetxt('ChiFlux.txt',chiFlux)
-    calculateSED(incl, PA, dpc, mdisk, n+1,)
-    sedBestfit = np.loadtxt('sed_%s.txt' %(n+1))
-    #sedBestfit = np.interp(fluxs[:,0],fluxBestfit1[:,0],fluxBestfit1[:,1])
-    chiSed = (sed[:,1]-sedBestfit[:,1])**2 / sed[:,2]**2
-    np.savetxt('ChiSed.txt',chiSed)
+    os.system('cp ./iteration_warehouse/flux_R_%s_%s.txt ./flux_R_%s.txt' % (lam[-1], n, lam[-1]))
+    fluxBestfit1 = np.loadtxt('flux_R_%s.txt' % (lam[-1]))
+    fluxBestfit = np.interp(fluxs[:, 0], fluxBestfit1[:, 0], fluxBestfit1[:, 1])
+    chiFlux = (fluxs[:, 1] - fluxBestfit) ** 2 / (fluxs[:, 1] * 0.1) ** 2
+    np.savetxt('ChiFlux.txt', chiFlux)
+    calculateSED(incl, PA, dpc, mdisk, n + 1, )
+    sedBestfit = np.loadtxt('sed_%s.txt' % (n + 1))
+    # sedBestfit = np.interp(fluxs[:,0],fluxBestfit1[:,0],fluxBestfit1[:,1])
+    chiSed = (sed[:, 1] - sedBestfit[:, 1]) ** 2 / sed[:, 2] ** 2
+    np.savetxt('ChiSed.txt', chiSed)
 
-    np.savetxt('mdustiter', mdiskiter)
-    os.system('mv mdust ./iteration_warehouse')
+    # np.savetxt('mdustiter', mdiskiter)
+    # os.system('mv mdust ./iteration_warehouse')
 
 
 def calculateDustMass(pathInput, grainNum):
     os.chdir('%s' % pathInput)
-    ##############计算面密度###################
     dustmass = 0
     grid = analyze.readGrid()
     vol = grid.getCellVolume()
@@ -860,14 +818,14 @@ def task(path,pathkappa,ifkappa,hGas100,flaring,turbulence):
     os.system('mkdir %s' %path)
     pathOut = '%s' %path #pathOut must end in '/'
     os.chdir('%s' %path)
+    pathOut = './'
 
     # grain(cm)
     amin = 1e-6  # 0.01um
-    amax = 1e1
+    amax = 0.3
     grainP = -3.5
     grainNum = 32
     grainLam = np.logspace(-5, 0, 160)
-    ifkappa = 0
 
     # grid (see Radmc3dPy)
     rin = 0.1 * natconst.au
@@ -886,13 +844,12 @@ def task(path,pathkappa,ifkappa,hGas100,flaring,turbulence):
     surfaceDensityP = -0.5
     mDisk = 0.14 * natconst.ms  # total mass = gas + dust
     dustToGas = 0.01
-    #turbulence = 1e-4
-
+    #turbulence = 1e-3
 
     # SED and ALMA
-    SEDLam = [1329, 2855] #band3 and band6 um
-    seds = np.loadtxt('%sDS_Tau.txt' %pathIn)  ##check target wavelength index
-    flux = np.loadtxt('%sDS_Tau_b6avgf.dat' %pathIn)
+    SEDLam = [1329, 2855]  # band3 and band6 um
+    seds = np.loadtxt('%sDS_Tau.txt' % pathIn)  ##check target wavelength index
+    flux = np.loadtxt('%sDS_Tau_b6avgf.dat' % pathIn)
     incl = 65.2
     PA = 159.62 - 90
     dpc = 158
@@ -902,17 +859,17 @@ def task(path,pathkappa,ifkappa,hGas100,flaring,turbulence):
     imageLam = [1329, ]  # um
     beamMajor = [0.13, ]
     beamMinor = [0.09, ]
-    beamPad = [20,]
+    beamPad = [20, ]
     # star and wavelength
     Teff = 3792
-    #L = 10**(-0.61)/natconst.ls
+    # L = 10**(-0.61)/natconst.ls
     Lstar = 0
-    #blackbody
+    # blackbody
     if Lstar != 0:
-        rstar = (Lstar/(4*np.pi*natconst.ss*T**4))**0.5
-    rstar = 2*natconst.rs
-    mstar = 0.58*natconst.ms
-    wavelength = np.logspace(-1,4,num=100)
+        rstar = (Lstar / (4 * np.pi * natconst.ss * T ** 4)) ** 0.5
+    rstar = 2 * natconst.rs
+    mstar = 0.58 * natconst.ms
+    wavelength = np.logspace(-1, 4, num=100)
 
     ##### create grain ######
     aList = np.logspace(np.log10(amin), np.log10(amax), num=grainNum)
@@ -922,8 +879,11 @@ def task(path,pathkappa,ifkappa,hGas100,flaring,turbulence):
     aBoundary[-1] = aLog10[-1] + (aLog10[1] - aLog10[0]) / 2
     if ifkappa == 1:
         for aIndex in range(grainNum):
-            createDSHARPGrain(pathIn,grainLam,aList[aIndex],aBoundary[aIndex],aBoundary[aIndex+1],grainP,aIndex+1,na=500)
+            createDSHARPGrain(pathIn, grainLam, aList[aIndex], aBoundary[aIndex], aBoundary[aIndex + 1], grainP,
+                              aIndex + 1,
+                              na=500)
     massWeight = calculateDustMassWeight(aList, grainP, mDisk * dustToGas)
+    np.savetxt('massWeight', massWeight)
 
     ##### create grid ######
     x, xi, nx, nxi = gridx(xbound, nx)
@@ -934,12 +894,12 @@ def task(path,pathkappa,ifkappa,hGas100,flaring,turbulence):
     ##### calculate pho ######
     phoList = np.zeros([len(x), len(y), len(z), grainNum], dtype=np.float64)
     for i in range(grainNum):
-        phoList[:, :, :, i] = calculatePho(pathOut, x, y, z, xi, yi, zi, hGas100, hGasLocation, flaring, surfaceDensityP,
-                                           rout, mDisk * massWeight[i] * dustToGas, aList[i], turbulence, 1, 0)
-    writeDustDensity(pathOut, phoList,'ini')
+        phoList[:, :, 0, i] = calculateDustPho(pathOut, x,xi, y,yi, hGas100, hGasLocation, flaring, surfaceDensityP, aList[i],
+                                               turbulence, i, mDisk, dustToGas, massWeight[i])
+    writeDustDensity(pathOut, phoList, 'ini')
 
     ##### radiative transfer ######
-    createSEDLam(pathOut,SEDLam)
+    createSEDLam(pathOut, SEDLam)
     makeRadSet(pathOut,
                nphot=10000000,
                nphot_scat=10000000,
@@ -952,23 +912,20 @@ def task(path,pathkappa,ifkappa,hGas100,flaring,turbulence):
                )
 
     makeOpacity(pathOut, grainNum)
-
     makeStarandWavelength(pathOut,rstar,mstar,wavelength,Teff)
-    iteration(pathOut,pathIn,grainNum, incl, PA,beamPad, dpc, mDisk,dustToGas, imageLam, beamMajor,beamMinor, SEDLam,seds, flux, pixelNum, sizeau, pixelSize, rout)
-
-
+    iteration(pathOut,pathkappa,grainNum, incl, PA, beamPad,dpc, mDisk,dustToGas, imageLam, beamMajor,beamMinor, SEDLam,seds, flux, pixelNum, sizeau, pixelSize, rout)
 
 p = mul.Pool(5)
 res_l = []
 poolNum = 0
 ifkappa = 0 #no = 0
-pathkappa = '/home/lidafa/桌面/Radmc3d_Simulation/test/' #The path here is incorrect. Please set an absolute path where the dustkappa file is located. To end with '/'
+pathkappa = './' #absolute path !
 
 for h100 in [0.06,0.08,0.1]:
     for flaring in [0.05,0.1,0.15]:
         for turbulence in [1e-2,1e-3,1e-4]:
-            path = '/home/lidafa/桌面/Radmc3d_Simulation/test/h100_%s_flaring_%s_turbulence_%s/' %(h100,flaring,turbulence) #The path here is incorrect. Please set an absolute path where the output file is located. To end with '/'
-            #task(path,pathkappa, ifkappa,h100, flaring,turbulence)
+            path = './h100_%s_flaring_%s_turbulence_%s/' %(h100,flaring,turbulence) #absolute path !
+            #ask(path,pathkappa, ifkappa,h100, flaring,turbulence)
             res = p.apply_async(task,args=(path,pathkappa, ifkappa,h100,flaring,turbulence))
             res_l.append(res)
 p.close()

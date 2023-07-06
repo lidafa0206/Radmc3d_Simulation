@@ -9,7 +9,7 @@ Our code is developed to fit the SED and ALMA continuum images of protoplanetary
    
    The density of dust is calculated by:
    $$\rho(R, z, a)=\frac{\Sigma(R, a)}{\sqrt{2 \pi} h(R, a)} \exp \left[-\frac{1}{2}\left(\frac{z}{h(R, a)}\right)^2\right]$$
-   $`a`$ is the dust of different sizes. $`z`$ is the height direction of the disk. The dust surface density $`\Sigma(R, a)`$ and the dust scale height $`h(R,a)`$ is:
+   $`a`$ is the dust of different sizes. $`z`$ is the height direction of the disk. The **INITIAL** dust surface density $`\Sigma(R, a)`$ and the dust scale height $`h(R,a)`$ is:
    $$\Sigma(R, a)=\Sigma_0(a)\left(\frac{R}{100 \mathrm{AU}}\right)^{-\gamma}$$
    $$h(R, a)=H_{\mathrm{gas}}\left(1+\frac{\mathrm{St}}{\alpha_{\mathrm{turb}}} \frac{1+2 \mathrm{St}}{1+\mathrm{St}}\right)^{-1 / 2}$$
    where $`R`$ is the radial direction of the disk. $`\alpha_{\mathrm{turb}}`$ is the turbulence. $`St`$ is Stokes number $`= \frac{\pi}{2} \frac{\rho_{\text {grain }} a}{\sum_{\text {gas }}(R)}`$. $`H_{\mathrm {gas}}`$ is the gas surface density $`H_{\mathrm{gas}}=H_{100 \cdot a_{\min }}\left(\frac{R}{100 \mathrm{AU}}\right)^\beta .`$. $`\Sigma_0(a)`$ is related to the size of the dust, and the mass ratio obtained for each dust of different sizes is:
@@ -221,11 +221,7 @@ If you want to run a multiprocess program to search for parameter space, you can
 
 **Please note that multi process programs should be set based on the number of CPU cores. The required number of cores is poolNum * setthreads. For example, if the parameters are pool (5) and setthread = 8, the required cores are 5 * 8=40.**
 
-# Acknowledgements
-If you want to use this code, please:
 
-1. Contact the author Yao Liu or DafaLi via email yliu@pmo.ac.cn or dfli@pmo.ac.cn.
-2. Cite Liu+ 2022, A&A, 668, A175 and Li+ 2023, MNRAS, 518, 6092L.
 
     
 

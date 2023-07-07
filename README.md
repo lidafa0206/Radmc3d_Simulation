@@ -18,7 +18,7 @@ Our code is developed to fit the SED and ALMA continuum images of protoplanetary
 5. Prepare auxiliary files for radmc3d(radmc.inp,dust_opac.inp,wavelength_micron.inp,stars.inp).
 6. Run the thermal simulation to get the dust temperature distribution (radmc3d mctherm).
 7. Simulate the continuum image, and compare the model radial intensity profile with the observed intensity profile.
-8. Update the dust surface density (see section 4.2 in Li+ 2023, MNRAS, 518, 6092L).
+8. Update the dust surface density (see section 4.2 in [Li+ 2023, MNRAS, 518, 6092L](https://ui.adsabs.harvard.edu/abs/2023MNRAS.518.6092L/abstract)).
 9. interate the steps from 3 to 7, until the dust surface density is converaged.
 10. Once the dust density is converaged (typically with 12 iterations), simulate the final SED and continuum image, and calculate the chi2_SED and chi2_image.
 

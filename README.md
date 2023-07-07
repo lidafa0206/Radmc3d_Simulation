@@ -5,7 +5,7 @@ Our code is developed to fit the SED and ALMA continuum images of protoplanetary
 ## Radmc3d_Simulation.py
 1. Set the model parameter values (for amin, amax, grainP, grainNum, grainLam, ifkappa) for calculating dust opacities.
 2. Set the grid of model space (number of radial and vertical grid points).
-3. Set the model parameter values (flaring, hGas100, hGasLocation, mDisk, dustToGas, turbulence), and assume an initial dust surface density, and prepare the input file of the dust density (i.e. dust_density.inp). The equations are taken from the equation 10 and 11 in Liu+ 2022, A&A, 668, A175.
+3. Set the model parameter values (flaring, hGas100, hGasLocation, mDisk, dustToGas, turbulence), and assume an initial dust surface density, and prepare the input file of the dust density (i.e. dust_density.inp). The equations are taken from the equation 10 and 11 in [Liu+ 2022, A&A, 668, A175](https://ui.adsabs.harvard.edu/abs/2022A%26A...668A.175L/abstract).
    
    The density of dust is calculated by:
    $$\rho(R, z, a)=\frac{\Sigma(R, a)}{\sqrt{2 \pi} h(R, a)} \exp \left[-\frac{1}{2}\left(\frac{z}{h(R, a)}\right)^2\right]$$

@@ -196,7 +196,13 @@ Files for each step(iteration_warehouse):
 
 3.fx_x:  fitting coefficient 
 
-4.time_section_x
+4.layer_x_iter_x.txt: Stokes number number and scale height of each kind of dust in each iteration. There are four columns in the files. The first column is the radius from the center, the second column is the Stokes number number, the third column is the gas scale height, and the fourth column is the ratio of the dust scale height to the gas scale height. The calculation method for dust scale height is to multiply the first column by the third column by the fourth column.
+
+5.sigmaGas_x.txt, sigmaDust_x_iter_x.txt: Gas surface density and dust surface density for each iteration. There are two columns in the file, the first column is the radius, and the second column is the surface density [g/cm^2].
+
+6.massWeight:  Mass partition coefficient of each kind of dust.
+
+7.time_section_x
 
 The last step of the flux and sed files:
 

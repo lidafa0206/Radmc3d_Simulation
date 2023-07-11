@@ -129,7 +129,7 @@ def createDSHARPGrain(pathOut, lam, amid, a1, a2, p, num, na=500):
     res_def = opacity.get_opacities(a, lam, rho_s=rhos_default, diel_const=d_def, extrapol=True,
                                     extrapolate_large_grains=True)
 
-    ###############导出尘埃kappa#############
+    ###############Output dustkappa_x.inp#############
     os.chdir('%s' % pathOut)
 
     lam * 1e-4

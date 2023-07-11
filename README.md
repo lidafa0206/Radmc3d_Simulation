@@ -37,6 +37,9 @@ dsharp_opac can be downloaded through:
         
         pip3 install dsharp_opac
 
+Radmc3d website:
+        https://www.ita.uni-heidelberg.de/~dullemond/software/radmc-3d/
+
 Radmc3d can be downloaded through:
         https://github.com/dullemond/radmc3d-2.0
         

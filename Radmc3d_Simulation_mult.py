@@ -840,7 +840,7 @@ def task(path,pathkappa,ifkappa,hGas100,flaring,turbulence):
     # disk parameters
     #hGas100 = 0.07
     hGasLocation = 100 * natconst.au
-    #flaring = 0.05  # flaring = 1.1
+    #flaring = 0.05  # flaring = 1.05
     surfaceDensityP = -0.5
     mDisk = 0.14 * natconst.ms  # total mass = gas + dust
     dustToGas = 0.01
